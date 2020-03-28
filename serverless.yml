@@ -19,7 +19,8 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table:${self:provider.environment.DYNAMODB_TABLE}"
+      #      arn:partition:service:region:account-id:resource-type:resource-id
+      Resource: "arn:aws:dynamodb:${self:provider.region}:*:table:${self:provider.environment.DYNAMODB_TABLE}"
 
 resources:
   Resources:
