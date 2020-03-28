@@ -1,0 +1,82 @@
+service: todo-api
+app: todo-api
+org: narwanimonish
+frameworkVersion: ">=1.1.0 <2.0.0"
+
+provider:
+  name: aws
+  runtime: python3.8
+  stage: dev
+  region: us-east-1
+    environment:
+      DYNAMODB_TABLE: 'todos'
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+          - dynamodb:Scan
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+          - dynamodb:UpdateItem
+          - dynamodb:DeleteItem
+        Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table:${self:provider.environment.DYNAMODB_TABLE}"
+
+resources:
+  Resources:
+    TodosDynamoDBTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+
+functions:
+  create:
+    handler: todo/create.create
+    events:
+      - http:
+          path: todo
+          method: post
+          cors: true
+
+  read:
+    handler: todo/read.read
+    events:
+      - http:
+          path: todo/{id}
+          method: get
+          cors: true
+
+  update:
+    handler: todo/update.update
+    events:
+      - http:
+          path: todo/{id}
+          method: put
+          cors: true
+
+  delete:
+    handler: todo/delete.delete
+    events:
+      - http:
+          path: todo/{id}
+          method: delete
+          cors: true
+
+  list:
+    handler: todo/list.list_all
+    events:
+      - http:
+          path: todo
+          method: get
+          cors: true
