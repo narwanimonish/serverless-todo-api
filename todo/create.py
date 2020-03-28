@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 import os
 import uuid
 import boto3
-from .utils import validate_event_object
+from todo.utils import validate_event_object
 
 
 dynamodb = boto3.resource('dynamodb')
