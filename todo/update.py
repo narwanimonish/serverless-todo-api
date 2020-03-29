@@ -16,23 +16,29 @@ def update(event, context):
 
     table = dynamodb.Table(os.environ['DYNAMODB_TABLE'])
 
-    result = table.update_item(
-        Key={
-            'id': event['pathParameters']['id']
-        },
-        ExpressionAttributeNames={
-            '#todo_task': 'task',
-        },
-        ExpressionAttributeValues={
-            ':task': data['task'],
-            ':completed': data['completed'],
-            ':updatedAt': current_time,
-        },
-        UpdateExpression='SET #todo_task = :task, '
-                         'completed = :completed, '
-                         'updatedAt = :updatedAt',
-        ReturnValues='ALL_NEW',
-    )
+    try:
+        result = table.update_item(
+            Key={
+                'id': event['pathParameters']['id']
+            },
+            ExpressionAttributeNames={
+                '#todo_task': 'task',
+            },
+            ExpressionAttributeValues={
+                ':task': data['task'],
+                ':completed': bool(data['completed']) if 'completed' in data else False,
+                ':updatedAt': current_time,
+            },
+            UpdateExpression='SET #todo_task = :task, '
+                             'completed = :completed, '
+                             'updatedAt = :updatedAt',
+            ReturnValues='ALL_NEW',
+        )
+    except Exception as e:
+        return  {
+            "statusCode": 500,
+            "message": "Updating task failed."
+        }
 
     response = {
         "statusCode": 200,

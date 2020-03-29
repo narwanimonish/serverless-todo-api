@@ -25,7 +25,15 @@ def create(event, context):
         'updatedAt': current_time,
     }
 
-    table.put_item(Item=item)
+    try:
+        table.put_item(Item=item)
+    except Exception as e:
+        print('Error: {}.'.format(e))
+        return {
+            "statusCode": 500,
+            "message": "Error in creating task."
+        }
+
 
     response = {
         "statusCode": 201,
